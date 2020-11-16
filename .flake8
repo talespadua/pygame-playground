@@ -1,0 +1,8 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+max-complexity = 6
+extend-ignore=C901
+max-line-length=88

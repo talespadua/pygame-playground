@@ -1,14 +1,18 @@
 import pygame
 
+from game.game_state import GameState
 from game.levels.level_factory import LevelFactory
-from game.levels.level_renderer import LevelRenderer
+from game.renderers.map_renderer import MapRenderer
 from game.settings import Settings
 
 
 class Game:
     def __init__(self, settings: Settings) -> None:
-        self.settings = settings
         pygame.init()
+
+        self.settings = settings
+        self.font = pygame.font.SysFont("Arial", 18)
+
         self.display = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height)
         )
@@ -16,9 +20,13 @@ class Game:
         pygame.display.set_caption(self.settings.window_caption)
         self.running = False
         self.current_level = LevelFactory.create(1)
-        # self.cell_size = pygame.Vector2(256 / 4, 256 / 8)
-        self.cell_size = pygame.Vector2(768 / 8, 768 / 16)
-        self.level_renderer = LevelRenderer(self.cell_size, self.display)
+        self.camera_position = self.current_level.initial_position
+        self.game_state = GameState(self.current_level)
+        self.level_renderer = MapRenderer(
+            self.game_state,
+            self.display,
+            self.current_level.sprite,
+        )
 
     def run(self) -> None:
         self.running = True
@@ -33,10 +41,17 @@ class Game:
         quit()
 
     def update(self) -> None:
-        pass
+        self.game_state.update_camera(self.camera_position)
+
+    def update_fps(self) -> pygame.surface.Surface:
+        fps = str(int(self.clock.get_fps()))
+        fps_text = self.font.render(fps, True, pygame.Color("coral"))
+        return fps_text
 
     def render(self) -> None:
-        self.level_renderer.render(self.current_level)
+        self.display.fill((0, 0, 0))
+        self.display.blit(self.update_fps(), (10, 0))
+        self.level_renderer.render(self.game_state)
         pygame.display.update()
 
     def handle_input(self) -> None:
@@ -47,4 +62,24 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                     return
+                elif event.key == pygame.K_RIGHT:
+                    self.camera_position = (
+                        self.camera_position[0] + 1,
+                        self.camera_position[1],
+                    )
+                elif event.key == pygame.K_LEFT:
+                    self.camera_position = (
+                        self.camera_position[0] - 1,
+                        self.camera_position[1],
+                    )
+                elif event.key == pygame.K_DOWN:
+                    self.camera_position = (
+                        self.camera_position[0],
+                        self.camera_position[1] + 1,
+                    )
+                elif event.key == pygame.K_UP:
+                    self.camera_position = (
+                        self.camera_position[0],
+                        self.camera_position[1] - 1,
+                    )
             return

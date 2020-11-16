@@ -1,5 +1,5 @@
 code/lint:
-	mypy . && black --check . && flake8 .
+	mypy ./game ./test && black --check . && flake8 .
 
 code/test:
 	pytest .

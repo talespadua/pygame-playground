@@ -12,4 +12,5 @@ class BaseLevel:
         else:
             self.sprite = image.load(level_config.spritesheet)
 
-        self.matrix = level_config.level_matrix
+        self.map_matrix = level_config.map_matrix
+        self.initial_position = level_config.initial_position
